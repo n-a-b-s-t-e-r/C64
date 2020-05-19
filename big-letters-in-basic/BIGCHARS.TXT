@@ -3,15 +3,20 @@
       rem lines 20-29 are a copyright notice
       rem lines 30-79 define variables
       rem lines 80-99 set preferences
-      rem lines 100-999 define functions
-      rem lines 1000-9999 are the main program block
-      rem lines 10000+ are subroutines
+      rem lines 100-980 define functions
+      rem line 990 jumps to the main program block
+      rem lines 1000-9999 are subroutines
+      rem subroutines moved earlier to search them
+      rem faster in basic
+      rem lines 10000+ are the main program block
       rem acknowledgments from line 63800+
 
       rem *************************
       rem what this program does
-      rem *************************
-      rem prints binary values of character a
+      rem -------------------------
+      rem so far it only prints decimal
+      rem values of the first few characters
+      rem from the c64's rom
 
       rem *************************
       rem gnu lesser public licence
@@ -24,7 +29,7 @@
       rem names must not contain 
       rem basic tokens such as st, fn,
       rem sin, for etc.
-      rem *************************
+      rem -------------------------
 
 40    b0$ = "    " :rem 0 in 4-bit binary
 41    b1$ = "   *" :
@@ -34,7 +39,7 @@
 
       rem *************************
       rem set preferences
-      rem *************************
+      rem -------------------------
 83    poke 53280,0   :rem set screenframe (border) colour to black
 84    poke 53272,23  :rem set upper lower case text mode
 85    poke 53281,11  :rem set background to dark grey
@@ -45,45 +50,52 @@
      rem define functions
      rem functions must be defined before they are called
      rem functions may contain peeks
-     rem *************************
+     rem -------------------------
 
-1000  rem *************************
-1001  rem core code
-1002  rem *************************
-
-1010  gosub 10014: rem enable charset visibility
-1020  for i=53248+8 to 53248+31:print peek(i): next
-1030  gosub 10043: rem clear charset visibility
-
-      rem end program here to not run into the subroutines
-9999  end
-
+      rem ***********************
+      rem jump to the main program block
+      rem bypassing the subroutines
+      rem -----------------------
+990   goto 10000
+999   end
+      
       rem *************************
-      rem subroutines
-      rem *************************
+1000  rem subroutines
+      rem -------------------------
 
       rem ## enable charset visibility ##
       rem # this poke deactivates the interrupt timer 
       rem to stop the cpu reading from reading the I/O
       rem memory range whilst the character map overlay
       rem is activated
-10014 poke 56334,peek(56334)and254
+1014 poke 56334,peek(56334)and254
       rem # clearing the first bit of memory address 55
       rem enables character rom visibility from $d000-$dfff
-10022 poke 1,51
-10030 return
+1022 poke 1,51
+1030 return
 
       rem ## clear charset visibility ##
       rem # this poke re-activates the interrupt timer 
       rem so that the computer does not crash
-10043 poke 56334,peek(56334)or1
+1043 poke 56334,peek(56334)or1
       rem # clearing the first bit of rmemory address 55
       rem enables character rom visibility from $d000-$dfff
-10022 poke 1,55
-10030 return
+1022 poke 1,55
+1030 return
 
-      rem dummy subroutine
-60100 n% = n% + 1 : print n% : return
+9998   end
+9999   rem end subroutines
+
+10000  rem *************************
+10001  rem core code
+10002  rem -------------------------
+
+10010  gosub 1014: rem enable charset visibility
+10020  for i=53248+8 to 53248+31:print peek(i): next
+10030  gosub 1043: rem clear charset visibility
+
+      rem end program
+63900 end
 
       rem *************************
       rem Acknowledgments and 
