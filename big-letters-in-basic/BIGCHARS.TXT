@@ -1,9 +1,9 @@
       rem lines 1-10 are a table of contents
       rem lines 10-19 describes what this program does
       rem lines 20-29 are a copyright notice
-      rem lines 30-79 define variables
       rem lines 80-99 set preferences
-      rem lines 100-980 define functions
+      rem lines 100-699 define variables
+      rem lines 700-980 define functions
       rem line 990 jumps to the main program block
       rem lines 1000-9999 are subroutines
       rem subroutines moved earlier to search them
@@ -14,28 +14,16 @@
       rem *************************
       rem what this program does
       rem -------------------------
-      rem so far it only prints decimal
-      rem values of the first few characters
+      rem so far it only dumps binary and decimal
+      rem values of the characters
       rem from the c64's rom
 
       rem *************************
       rem gnu lesser public licence
       rem *************************
 
-      rem *************************
-      rem variable definition
-      rem it is wise to use variable 
-      rem names with max 2 characters
-      rem names must not contain 
-      rem basic tokens such as st, fn,
-      rem sin, for etc.
-      rem -------------------------
 
-40    b0$ = "    " :rem 0 in 4-bit binary
-41    b1$ = "   *" :
-42    b2$ = "  * "
-43    b3$ = "  **"
-44    
+
 
       rem *************************
       rem set preferences
@@ -46,11 +34,53 @@
 86    poke 646,1     :rem set cursor colour to white
 87    print chr$(147):rem clear the screen
 
-     rem *************************   
-     rem define functions
-     rem functions must be defined before they are called
-     rem functions may contain peeks
-     rem -------------------------
+      rem *************************
+      rem variable definition
+      rem it is wise to use variable 
+      rem names with max 2 characters
+      rem names must not contain 
+      rem basic tokens such as st, fn,
+      rem sin, for etc.
+      rem -------------------------
+
+130    ch = 53248 :rem start of character rom, note integer max is 32767
+131    sc% = 1024  :rem default start of screen ram
+132    co = 55296 :rem start of colour ram 1000 bytes (upper nybbles ignored), note integer max is 32767
+133    a   = 0     :rem alphabet position pointer
+134    hn% = 0     :rem initialze high nybble as integer
+135    ln% = 0     :rem initialze low nybble as integer
+136    dim b%(7)   :rem for 8 rows of character bytes
+137    ro = 0      :rem character row counter, int not working for loop
+
+139    dim n$(15)     :rem defining an array to represent nybbles 0-15 as text
+140    n$(0) = "    " :rem 0 in 4-bit binary
+141    n$(1) = "   *" :rem 1 in 4-bit binary
+142    n$(2) = "  * " :rem 2 in 4-bit binary
+143    n$(3) = "  **" :rem 3 in 4-bit binary
+144    n$(4) = " *  " :rem and so un until 15
+145    n$(5) = " * *"
+146    n$(6) = " ** "
+147    n$(7) = " ***"
+148    n$(8) = "*   "
+149    n$(9) = "*  *"
+150    n$(10)= "* * "
+151    n$(11)= "* **"
+152    n$(12)= "**  "
+153    n$(13)= "** *"
+154    n$(14)= "*** "
+155    n$(15)= "****"
+
+
+      rem *************************   
+      rem define functions
+      rem functions must be defined before they are called
+      rem functions may contain peeks
+      rem -------------------------
+
+700   rem lower nybble function
+701   def fn ln(x)=(x and 15)
+710   rem upper nybble function
+711   def fn un(x)=(x and 240)/16
 
       rem ***********************
       rem jump to the main program block
@@ -60,28 +90,20 @@
 999   end
       
       rem *************************
-1000  rem subroutines
+1000  rem subroutines block to 9997
       rem -------------------------
 
-      rem ## enable charset visibility ##
-      rem # this poke deactivates the interrupt timer 
-      rem to stop the cpu reading from reading the I/O
-      rem memory range whilst the character map overlay
-      rem is activated
-1014 poke 56334,peek(56334)and254
-      rem # clearing the first bit of memory address 55
-      rem enables character rom visibility from $d000-$dfff
-1022 poke 1,51
-1030 return
 
-      rem ## clear charset visibility ##
-      rem # this poke re-activates the interrupt timer 
-      rem so that the computer does not crash
-1043 poke 56334,peek(56334)or1
-      rem # clearing the first bit of rmemory address 55
-      rem enables character rom visibility from $d000-$dfff
-1022 poke 1,55
-1030 return
+
+1048  rem ## read 8 rows of character rom data ##  
+1049  rem # starting from alphabet position a   #
+1050  poke 56334,peek(56334)or1:poke 1,55:rem enable charset visibility
+1051  for ro=0 to 7
+1052  b%(ro)=peek (ch+(a*8)+ro)
+1053  next ro
+1054  poke 56334,peek(56334)or1:poke 1,55:rem clear charset visibility
+1055  return
+
 
 9998   end
 9999   rem end subroutines
@@ -90,23 +112,39 @@
 10001  rem core code
 10002  rem -------------------------
 
-10010  gosub 1014: rem enable charset visibility
-10020  for i=53248+8 to 53248+31:print peek(i): next
-10030  gosub 1043: rem clear charset visibility
 
-      rem end program
-63900 end
+10040  rem 
+10050  rem 
+10055  for a = 1 to 100
 
-      rem *************************
-      rem Acknowledgments and 
-      rem references.
-      rem *************************
-      rem - c64 wiki
-      rem - coding64.org character mode to bitmap
-      rem - tendim on stackoverflow multi-line functions
+10060  rem get its 8 rows into b%() dimension
+10070  gosub 1048
 
-63997 rem *************************
-63998 rem 63999 is the last line allowed in c64 basic
-63999 rem *************************
+10080  rem print its upper and lower nybbles
+10090  for ro = 0 to 7
+10100  print n$(fn un(b%(ro)));
+10110  print n$(fn ln(b%(ro)));
+10120  print ch+a*8+ro;
+10130  print " ";
+10140  print b%(ro)
+10150  next ro
+
+10160  next a
+
+
+       rem end program
+63900  end
+
+       rem *************************
+       rem acknowledgments and 
+       rem references.
+       rem *************************
+       rem - c64 wiki
+       rem - coding64.org character mode to bitmap
+       rem - tendim on stackoverflow multi-line functions
+
+63997  rem *************************
+63998  rem 63999 is the last line allowed in c64 basic
+63999  rem *************************
 
 
